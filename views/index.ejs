@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Result Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-black to-gray-900 min-h-screen p-6 font-sans text-gray-100">
+
+  <div class="max-w-6xl mx-auto bg-gray-800/70 backdrop-blur-lg p-8 rounded-3xl shadow-2xl border border-gray-700">
+
+    <!-- Heading -->
+    <h1 class="text-4xl font-extrabold text-center text-indigo-400 mb-6 tracking-tight drop-shadow-lg">
+       Student Result Management
+    </h1>
+    <p class="text-center text-gray-400 mb-10">Manage student marks, calculate results, and track performance.</p>
+
+    <!-- Add Student Result Form -->
+    <form action="/add" method="POST"
+      class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 bg-gray-900/50 backdrop-blur-lg p-6 rounded-xl shadow-lg border border-gray-700">
+      <input type="text" name="fullName" placeholder="Full Name" required
+        class="p-3 border border-gray-700 bg-gray-800 text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+      <input type="text" name="class" placeholder="Class" required
+        class="p-3 border border-gray-700 bg-gray-800 text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+      <input type="number" name="rollNumber" placeholder="Roll Number" required
+        class="p-3 border border-gray-700 bg-gray-800 text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+      <input type="number" name="math" placeholder="Math Marks" required
+        class="p-3 border border-gray-700 bg-gray-800 text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+      <input type="number" name="science" placeholder="Science Marks" required
+        class="p-3 border border-gray-700 bg-gray-800 text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+      <input type="number" name="english" placeholder="English Marks" required
+        class="p-3 border border-gray-700 bg-gray-800 text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+      <input type="email" name="email" placeholder="Email" required
+        class="p-3 border border-gray-700 bg-gray-800 text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+      <input type="password" name="password" placeholder="Password" required
+        class="p-3 border border-gray-700 bg-gray-800 text-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+
+      <div class="md:col-span-2">
+        <button type="submit"
+          class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-lg hover:scale-105 transform transition duration-200 shadow-lg font-semibold">
+           Add Student Result
+        </button>
+      </div>
+    </form>
+
+    <!-- Student Results List -->
+    <div class="grid gap-6">
+      <% students.forEach(student => { %>
+      <div
+        class="bg-gray-900/50 backdrop-blur-lg border border-gray-700 p-6 rounded-xl shadow-md hover:shadow-indigo-500/20 transition duration-300">
+
+        <!-- Student Info -->
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+          <div>
+            <h3 class="text-xl font-bold text-indigo-300 flex items-center gap-2">
+              <%= student.fullName %>
+            </h3>
+            <p class="text-sm text-gray-400"> Class: <%= student.class %></p>
+            <p class="text-sm text-gray-400"> Roll: <%= student.rollNumber %></p>
+            <p class="text-sm text-gray-400"> Email: <%= student.email %></p>
+          </div>
+
+          <!-- Result Badge -->
+          <div>
+            <% if(student.resultStatus === "Pass") { %>
+              <span class="px-4 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium"> Pass</span>
+            <% } else { %>
+              <span class="px-4 py-1 bg-red-500/20 text-red-400 rounded-full text-sm font-medium"> Fail</span>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Marks Grid -->
+        <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+          <div class="bg-indigo-500/10 p-3 rounded-lg text-center">
+             Math: <span class="font-semibold text-indigo-300"><%= student.math %></span>
+          </div>
+          <div class="bg-indigo-500/10 p-3 rounded-lg text-center">
+             Science: <span class="font-semibold text-indigo-300"><%= student.science %></span>
+          </div>
+          <div class="bg-indigo-500/10 p-3 rounded-lg text-center">
+             English: <span class="font-semibold text-indigo-300"><%= student.english %></span>
+          </div>
+          <div class="bg-purple-500/10 p-3 rounded-lg text-center">
+             Total: <span class="font-semibold text-purple-300"><%= student.totalMarks %></span>
+          </div>
+          <div class="bg-purple-500/10 p-3 rounded-lg text-center">
+             Percentage: <span class="font-semibold text-purple-300"><%= student.percentage.toFixed(2) %>%</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4 flex gap-2">
+          <button onclick="toggleEdit('<%= student._id %>')"
+            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg shadow-sm transition">
+             Edit
+          </button>
+          <form action="/delete" method="POST" onsubmit="return confirm('Delete this student result?')">
+            <input type="hidden" name="id" value="<%= student._id %>" />
+            <button type="submit"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-sm transition">
+               Delete
+            </button>
+          </form>
+        </div>
+
+        <!-- Edit Form -->
+        <form id="edit-<%= student._id %>" action="/update" method="POST"
+          class="hidden mt-4 bg-gray-800 p-4 rounded-lg border border-gray-700">
+          <input type="hidden" name="id" value="<%= student._id %>" />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" name="fullName" value="<%= student.fullName %>" class="p-2 border border-gray-700 bg-gray-900 text-gray-100 rounded-lg" required />
+            <input type="text" name="class" value="<%= student.class %>" class="p-2 border border-gray-700 bg-gray-900 text-gray-100 rounded-lg" required />
+            <input type="number" name="rollNumber" value="<%= student.rollNumber %>" class="p-2 border border-gray-700 bg-gray-900 text-gray-100 rounded-lg" required />
+            <input type="number" name="math" value="<%= student.math %>" class="p-2 border border-gray-700 bg-gray-900 text-gray-100 rounded-lg" required />
+            <input type="number" name="science" value="<%= student.science %>" class="p-2 border border-gray-700 bg-gray-900 text-gray-100 rounded-lg" required />
+            <input type="number" name="english" value="<%= student.english %>" class="p-2 border border-gray-700 bg-gray-900 text-gray-100 rounded-lg" required />
+            <input type="email" name="email" value="<%= student.email %>" class="p-2 border border-gray-700 bg-gray-900 text-gray-100 rounded-lg" required />
+            <input type="password" name="password" placeholder="Change Password (optional)" class="p-2 border border-gray-700 bg-gray-900 text-gray-100 rounded-lg" />
+          </div>
+          <div class="mt-4 flex gap-2">
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">💾 Save</button>
+            <button type="button" onclick="cancelEdit('<%= student._id %>')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">❌ Cancel</button>
+          </div>
+        </form>
+      </div>
+      <% }) %>
+    </div>
+
+  </div>
+
+  <!-- JS for Edit Toggle -->
+  <script>
+    function toggleEdit(id) {
+      document.getElementById(`edit-${id}`).style.display = 'block';
+    }
+    function cancelEdit(id) {
+      document.getElementById(`edit-${id}`).style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
