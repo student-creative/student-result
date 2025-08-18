@@ -7,26 +7,19 @@
 var app = require('../app');
 var debug = require('debug')('student-result-api:server');
 var http = require('http');
+require('dotenv').config();
 
-/**
+const mongoose = require('mongoose');
 
-/**
- * Get port from environment and store in Express.
- */
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB Atlas Connected!'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
 
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 
-
-const mongoose = require('mongoose');
-
-mongoose.connect('mongodb://127.0.0.1:27017/student-result-api')
-  .then(() => console.log('Connected!'));
-
-/**
- * Create HTTP server.
- */
 
 var server = http.createServer(app);
 
