@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
 
 <head>
   <meta charset="UTF-8" />
@@ -42,10 +43,38 @@
         <button type="submit"
           class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-lg hover:scale-105 transform transition duration-200 shadow-lg font-semibold">
            Add Student Result
+=======
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Result Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-screen p-6 font-sans">
+
+  <div class="max-w-6xl mx-auto bg-white p-8 rounded-3xl shadow-xl border border-indigo-100">
+    
+    <!-- Heading -->
+    <h1 class="text-4xl font-extrabold text-center text-indigo-800 mb-6 tracking-tight">
+      🎓 Student Result Management
+    </h1>
+    <p class="text-center text-gray-500 mb-10">Manage students, update results, and track performance with ease.</p>
+
+    <!-- Add Form -->
+    <form action="/add" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-xl shadow-md border border-indigo-100">
+      <input type="text" name="name" placeholder="Student Name" required class="p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none" />
+      <input type="text" name="rollNumber" placeholder="Roll Number" required class="p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none" />
+      <input type="text" name="subject" placeholder="Subject" required class="p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none" />
+      <input type="number" name="marks" placeholder="Marks" required class="p-3 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none" />
+      <div class="md:col-span-2">
+        <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg hover:scale-105 transform transition duration-200 shadow-lg font-semibold">
+          ➕ Add Student
+>>>>>>> 6155596 (mongo atlas issue)
         </button>
       </div>
     </form>
 
+<<<<<<< HEAD
     <!-- Student Results List -->
     <div class="grid gap-6">
       <% students.forEach(student => { %>
@@ -135,10 +164,73 @@
   <!-- JS for Edit Toggle -->
   <script>
     function toggleEdit(id) {
+=======
+    <!-- Student List -->
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+      📋 All Students
+      <span class="text-sm font-normal text-gray-500">(<%= students.length %> total)</span>
+    </h2>
+
+    <div class="grid gap-6">
+      <% students.forEach(student => { %>
+        <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300" id="card-<%= student._id %>">
+          
+          <!-- View Mode -->
+          <div id="view-<%= student._id %>">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+              <div>
+                <p class="text-xl font-semibold text-gray-800 flex items-center gap-2">👤 <%= student.name %></p>
+                <p class="text-sm text-gray-600">🆔 Roll: <%= student.rollNumber %></p>
+                <p class="text-sm text-gray-600">📘 Subject: <%= student.subject %></p>
+                <p class="text-sm text-gray-600">🧮 Marks: <%= student.marks %></p>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="toggleEdit('<%= student._id %>')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg shadow-sm transition">
+                  ✏️ Edit
+                </button>
+                <form action="/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this student?')">
+                  <input type="hidden" name="id" value="<%= student._id %>" />
+                  <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-sm transition">
+                    🗑️ Delete
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Mode -->
+          <form id="edit-<%= student._id %>" action="/update" method="POST" class="hidden mt-4 bg-gray-50 p-4 rounded-lg border">
+            <input type="hidden" name="id" value="<%= student._id %>" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input type="text" name="name" value="<%= student.name %>" class="p-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none" required />
+              <input type="text" name="rollNumber" value="<%= student.rollNumber %>" class="p-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none" required />
+              <input type="text" name="subject" value="<%= student.subject %>" class="p-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none" required />
+              <input type="number" name="marks" value="<%= student.marks %>" class="p-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none" required />
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">💾 Save</button>
+              <button type="button" onclick="cancelEdit('<%= student._id %>')" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">❌ Cancel</button>
+            </div>
+          </form>
+
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <!-- JS to Toggle Edit Mode -->
+  <script>
+    function toggleEdit(id) {
+      document.getElementById(`view-${id}`).style.display = 'none';
+>>>>>>> 6155596 (mongo atlas issue)
       document.getElementById(`edit-${id}`).style.display = 'block';
     }
     function cancelEdit(id) {
       document.getElementById(`edit-${id}`).style.display = 'none';
+<<<<<<< HEAD
+=======
+      document.getElementById(`view-${id}`).style.display = 'block';
+>>>>>>> 6155596 (mongo atlas issue)
     }
   </script>
 

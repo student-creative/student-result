@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const userModel = require("../model/usermodel");
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
@@ -43,10 +44,33 @@ exports.getData = async (req, res) => {
 
   try {
     const students = await userModel.find();  // ✅ Data from DB
+=======
+const User = require('../model/usermodel');
+
+//Insert data
+exports.Insert = async (req, res) => {
+
+  try {
+   await User.create(req.body);
+    res.redirect('/');
+  } catch (err) {
+    res.status(500).send('Error inserting student: ' + err.message);
+  }
+
+}
+
+
+
+//Insert data
+exports.student = async (req, res) => {
+  try {
+    const students = await User.find();  // ✅ Data from DB
+>>>>>>> 6155596 (mongo atlas issue)
     res.render('index', { students });   // ✅ EJS को data भेजा
   } catch (error) {
     res.send('Error: ' + error.message);
   }
+<<<<<<< HEAD
 
 }
 
@@ -94,20 +118,55 @@ exports.updateData = async (req, res) => {
     res.redirect('/');
   } catch (err) {
     console.error("Update Error:", err);
+=======
+};
+
+
+
+//Upadte
+
+
+
+// Update Student
+exports.Update = async (req, res) => {
+  const { id, name, rollNumber, subject, marks } = req.body;
+
+  try {
+    await User.findByIdAndUpdate(id, {
+      name,
+      rollNumber,
+      subject,
+      marks,
+    });
+    res.redirect('/');
+  } catch (err) {
+>>>>>>> 6155596 (mongo atlas issue)
     res.status(500).send('Error updating student: ' + err.message);
   }
 };
 
+<<<<<<< HEAD
 exports.deleteData = async (req, res) => {  
     const { id } = req.body; // सिर्फ id चाहिए delete के लिए
 
   try {
     await userModel.findByIdAndDelete(id); // ✅ बस id से delete होता है
+=======
+exports.Delete = async (req, res) => {
+  const { id } = req.body; // सिर्फ id चाहिए delete के लिए
+
+  try {
+    await User.findByIdAndDelete(id); // ✅ बस id से delete होता है
+>>>>>>> 6155596 (mongo atlas issue)
     res.redirect('/');
   } catch (err) {
     res.status(500).send('Error deleting student: ' + err.message);
   }
+<<<<<<< HEAD
 }
 
 
 
+=======
+};
+>>>>>>> 6155596 (mongo atlas issue)

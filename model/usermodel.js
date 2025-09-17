@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const mongoose = require("mongoose");
 
 const StudentResultSchema = new mongoose.Schema({
@@ -64,3 +65,17 @@ StudentResultSchema.pre("save", function (next) {
 });
 
 module.exports = mongoose.model("marksheets", StudentResultSchema);
+=======
+var mongoose = require('mongoose');
+
+var userSchema = new mongoose.Schema({
+    name: String,
+    rollNumber: String,
+    subject: String,
+    marks: Number
+});
+
+var User = mongoose.model('student', userSchema);
+
+module.exports = User;  
+>>>>>>> 6155596 (mongo atlas issue)
