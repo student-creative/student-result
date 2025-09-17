@@ -6,15 +6,17 @@
 var app = require('../app');
 var debug = require('debug')('student-result-api:server');
 var http = require('http');
-
 const mongoose = require("mongoose");
+require('dotenv').config(); // load .env
 
-// MongoDB Atlas connection
-mongoose.connect(
-  "mongodb+srv://student-result:student123@cluster0.lfbd1b3.mongodb.net/student-result?retryWrites=true&w=majority&appName=Cluster0"
-)
+// MongoDB Atlas connection using environment variable
+const mongoURI = process.env.MONGODB_URI;
+mongoose.connect(mongoURI)
   .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.log("❌ MongoDB Connection Error:", err));
+  .catch(err => {
+    console.error("❌ MongoDB Connection Error:", err);
+    process.exit(1); // Exit if connection fails
+  });
 
 /**
  * Get port from environment and store in Express.
@@ -39,7 +41,6 @@ server.on('listening', onListening);
  */
 function normalizePort(val) {
   var port = parseInt(val, 10);
-
   if (isNaN(port)) return val;
   if (port >= 0) return port;
   return false;
@@ -50,9 +51,7 @@ function normalizePort(val) {
  */
 function onError(error) {
   if (error.syscall !== 'listen') throw error;
-
   var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
-
   switch (error.code) {
     case 'EACCES':
       console.error(bind + ' requires elevated privileges');
