@@ -1,172 +1,291 @@
-<<<<<<< HEAD
 const userModel = require("../model/usermodel");
 const bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
-
+// User Registration
 exports.InsertData = async (req, res) => {
     try {
-        var b_pass =  await bcrypt.hash(req.body.password, 10);
-        req.body.password = b_pass;
-       await userModel.create(req.body);
-        res.redirect('/');
+        // Password hash
+        const hashedPassword = await bcrypt.hash(req.body.password, 12);
+        req.body.password = hashedPassword;
+        
+        // Create user
+        await userModel.create(req.body);
+        res.status(201).json({ 
+            success: true, 
+            message: "User created successfully" 
+        });
     } catch (error) {
-        console.error("Insert Error:", error); 
-       res.status(500).send('Error inserting student: ' + err.message);
+        console.error("Insert Error:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Error creating user", 
+            error: error.message 
+        });
     }
 };
 
+// User Login
 exports.Login = async (req, res) => {
     try {
-
-        var singleData = await userModel.find({email:req.body.email});
-
-        if(singleData.length >= 1){
-            bcrypt.compare(req.body.password, singleData[0].password, function(err, result) {
-                if(result == true){
-                    const token = jwt.sign(req.body, 'cdmi', {expiresIn : '1h'});
-                    res.status(200).json({ message: "Login successfully",token});
-                }else{
-                    res.status(200).json({ message: "Invalid Password"});
-                }
+        const { email, password } = req.body;
+        
+        // Input validation
+        if (!email || !password) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Email and password are required" 
             });
-        }else{
-            res.status(200).json({ message: "Email id is wrong..."});    
         }
+
+        // Find user by email
+        const user = await userModel.findOne({ email });
+        
+        if (!user) {
+            return res.status(401).json({ 
+                success: false, 
+                message: "Invalid email or password" 
+            });
+        }
+
+        // Compare password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        
+        if (!isPasswordValid) {
+            return res.status(401).json({ 
+                success: false, 
+                message: "Invalid email or password" 
+            });
+        }
+
+        // Create JWT token
+        const tokenPayload = { 
+            id: user._id, 
+            email: user.email 
+        };
+        
+        const token = jwt.sign(
+            tokenPayload, 
+            process.env.JWT_SECRET || 'cdmi', 
+            { expiresIn: '24h' }
+        );
+
+        res.status(200).json({ 
+            success: true,
+            message: "Login successful",
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                fullName: user.fullName
+            }
+        });
+
     } catch (error) {
-        console.error("Insert Error:", error); 
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        console.error("Login Error:", error);
+        res.status(500).json({ 
+            success: false,
+            message: "Internal server error", 
+            error: error.message 
+        });
     }
 };
 
-
+// Get all users
 exports.getData = async (req, res) => {
-
-  try {
-    const students = await userModel.find();  // ✅ Data from DB
-=======
-const User = require('../model/usermodel');
-
-//Insert data
-exports.Insert = async (req, res) => {
-
-  try {
-   await User.create(req.body);
-    res.redirect('/');
-  } catch (err) {
-    res.status(500).send('Error inserting student: ' + err.message);
-  }
-
-}
-
-
-
-//Insert data
-exports.student = async (req, res) => {
-  try {
-    const students = await User.find();  // ✅ Data from DB
->>>>>>> 6155596 (mongo atlas issue)
-    res.render('index', { students });   // ✅ EJS को data भेजा
-  } catch (error) {
-    res.send('Error: ' + error.message);
-  }
-<<<<<<< HEAD
-
-}
-
-exports.updateData = async (req, res) => {
-  const {
-    id,
-    fullName,
-    class: studentClass,
-    rollNumber,
-    math,
-    science,
-    english,
-    password,
-    email
-  } = req.body;
-
-  try {
-    // Auto calculations
-    const totalMarks = Number(math) + Number(science) + Number(english);
-    const percentage = totalMarks / 3;
-    const resultStatus =
-      math >= 35 && science >= 35 && english >= 35 ? "Pass" : "Fail";
-
-    // Update object
-    const updateData = {
-      fullName,
-      class: studentClass,
-      rollNumber,
-      math,
-      science,
-      english,
-      totalMarks,
-      percentage,
-      resultStatus,
-      email
-    };
-
-    // Password optional update
-    if (password && password.trim() !== "") {
-      updateData.password = password;
+    try {
+        const users = await userModel.find().select('-password'); // Password exclude
+        
+        res.status(200).json({
+            success: true,
+            count: users.length,
+            data: users
+        });
+    } catch (error) {
+        console.error("Get Data Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error fetching users",
+            error: error.message
+        });
     }
-
-    await userModel.findByIdAndUpdate(id, updateData, { new: true });
-
-    res.redirect('/');
-  } catch (err) {
-    console.error("Update Error:", err);
-=======
 };
 
+// For rendering EJS page
+exports.student = async (req, res) => {
+    try {
+        const students = await userModel.find().select('-password');
+        res.render('index', { students });
+    } catch (error) {
+        console.error("Student Page Error:", error);
+        res.status(500).send('Error loading page: ' + error.message);
+    }
+};
 
+// Update user data
+exports.updateData = async (req, res) => {
+    try {
+        const {
+            id,
+            fullName,
+            class: studentClass,
+            rollNumber,
+            math,
+            science,
+            english,
+            password,
+            email
+        } = req.body;
 
-//Upadte
+        // Input validation
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "User ID is required"
+            });
+        }
 
+        // Auto calculations for marks
+        const mathMarks = Number(math) || 0;
+        const scienceMarks = Number(science) || 0;
+        const englishMarks = Number(english) || 0;
+        
+        const totalMarks = mathMarks + scienceMarks + englishMarks;
+        const percentage = totalMarks / 3;
+        const resultStatus = (mathMarks >= 35 && scienceMarks >= 35 && englishMarks >= 35) 
+            ? "Pass" : "Fail";
 
+        // Update object
+        const updateData = {
+            fullName,
+            class: studentClass,
+            rollNumber,
+            math: mathMarks,
+            science: scienceMarks,
+            english: englishMarks,
+            totalMarks,
+            percentage: Math.round(percentage * 100) / 100, // 2 decimal places
+            resultStatus,
+            email
+        };
 
-// Update Student
+        // Password optional update
+        if (password && password.trim() !== "") {
+            updateData.password = await bcrypt.hash(password, 12);
+        }
+
+        const updatedUser = await userModel.findByIdAndUpdate(
+            id, 
+            updateData, 
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User updated successfully",
+            data: updatedUser
+        });
+
+    } catch (error) {
+        console.error("Update Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error updating user",
+            error: error.message
+        });
+    }
+};
+
+// Delete user
+exports.deleteData = async (req, res) => {
+    try {
+        const { id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "User ID is required"
+            });
+        }
+
+        const deletedUser = await userModel.findByIdAndDelete(id);
+
+        if (!deletedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User deleted successfully"
+        });
+
+    } catch (error) {
+        console.error("Delete Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting user",
+            error: error.message
+        });
+    }
+};
+
+// Alternative insert method for EJS forms
+exports.Insert = async (req, res) => {
+    try {
+        await userModel.create(req.body);
+        res.redirect('/');
+    } catch (error) {
+        console.error("Insert Error:", error);
+        res.status(500).send('Error inserting user: ' + error.message);
+    }
+};
+
+// Alternative update method for EJS forms
 exports.Update = async (req, res) => {
-  const { id, name, rollNumber, subject, marks } = req.body;
+    try {
+        const { id, name, rollNumber, subject, marks } = req.body;
 
-  try {
-    await User.findByIdAndUpdate(id, {
-      name,
-      rollNumber,
-      subject,
-      marks,
-    });
-    res.redirect('/');
-  } catch (err) {
->>>>>>> 6155596 (mongo atlas issue)
-    res.status(500).send('Error updating student: ' + err.message);
-  }
+        if (!id) {
+            return res.status(400).send('User ID is required');
+        }
+
+        await userModel.findByIdAndUpdate(id, {
+            name,
+            rollNumber,
+            subject,
+            marks,
+        });
+        
+        res.redirect('/');
+    } catch (error) {
+        console.error("Update Error:", error);
+        res.status(500).send('Error updating user: ' + error.message);
+    }
 };
 
-<<<<<<< HEAD
-exports.deleteData = async (req, res) => {  
-    const { id } = req.body; // सिर्फ id चाहिए delete के लिए
-
-  try {
-    await userModel.findByIdAndDelete(id); // ✅ बस id से delete होता है
-=======
+// Alternative delete method for EJS forms
 exports.Delete = async (req, res) => {
-  const { id } = req.body; // सिर्फ id चाहिए delete के लिए
+    try {
+        const { id } = req.body;
 
-  try {
-    await User.findByIdAndDelete(id); // ✅ बस id से delete होता है
->>>>>>> 6155596 (mongo atlas issue)
-    res.redirect('/');
-  } catch (err) {
-    res.status(500).send('Error deleting student: ' + err.message);
-  }
-<<<<<<< HEAD
-}
+        if (!id) {
+            return res.status(400).send('User ID is required');
+        }
 
-
-
-=======
+        await userModel.findByIdAndDelete(id);
+        res.redirect('/');
+    } catch (error) {
+        console.error("Delete Error:", error);
+        res.status(500).send('Error deleting user: ' + error.message);
+    }
 };
->>>>>>> 6155596 (mongo atlas issue)
